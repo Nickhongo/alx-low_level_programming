@@ -1,7 +1,7 @@
 #include <stdio.h>
 /**
- * main(void) is my entry point
- * return will br (0) if correct
+ * main - is my entry point
+ * return - will be (0) if correct
 */
 int main(void)
 {
