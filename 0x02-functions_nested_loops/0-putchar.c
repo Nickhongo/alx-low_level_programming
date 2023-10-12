@@ -1,22 +1,19 @@
-#include <stdio.h>
+#include "main.h"
 /**
- * main - the entry point of the program
- * Description: printing _putchar
- * int main(void) : accepts no parameters
- * Return: returns 0 if successful
+ * main - function that prints _putchar
+ * Return: returns 0 to indicate success
  */
-
 int main(void)
 {
-	putchar('_');
-	putchar('p');
-	putchar('u');
-	putchar('t');
-	putchar('c');
-	putchar('h');
-	putchar('a');
-	putchar('r');
-	putchar('\n');
+	_putchar('_');
+	_putchar('p');
+	_putchar('u');
+	_putchar('t');
+	_putchar('c');
+	_putchar('h');
+	_putchar('a');
+	_putchar('r');
 
+	_putchar('\n');
 	return (0);
 }
