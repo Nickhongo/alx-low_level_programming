@@ -12,6 +12,7 @@ char *string_nconcat(char *s1, char *s2, unsigned int n)
 {
 	size_t x;
 	size_t y;
+	size_t total;
 	char *concat;
 
 	if (s1 == NULL)
@@ -25,19 +26,21 @@ char *string_nconcat(char *s1, char *s2, unsigned int n)
 
 	x = strlen(s1);
 	y = strlen(s2);
+
 	if (n >= y)
 	{
 		n = y;
 	}
 
-	concat = (char *)malloc(x + n + 1);
+	total = x + n;
+
+	concat = (char *)malloc(total + 1);
 	if (concat == NULL)
 	{
 		return (NULL);
 	}
-	strncpy(concat, s1, x);
+	strcpy(concat, s1);
 	strncat(concat, s2, n);
 
-	concat[y + n] = '\0';
 	return (concat);
 }
