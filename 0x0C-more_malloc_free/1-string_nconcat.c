@@ -10,8 +10,8 @@
  */
 char *string_nconcat(char *s1, char *s2, unsigned int n)
 {
-	size_t len1;
-	size_t len2;
+	size_t x;
+	size_t y;
 	char *concat;
 
 	if (s1 == NULL)
@@ -23,21 +23,21 @@ char *string_nconcat(char *s1, char *s2, unsigned int n)
 		s2 = " ";
 	}
 
-	len1 = strlen(s1);
-	len2 = strlen(s2);
-	if (n >= len2)
+	x = strlen(s1);
+	y = strlen(s2);
+	if (n >= y)
 	{
-		n = len2;
+		n = y;
 	}
 
-	concat = (char *)malloc(len1 + n + 1);
+	concat = (char *)malloc(x + n + 1);
 	if (concat == NULL)
 	{
 		return (NULL);
 	}
-	strncpy(concat, s1, len1);
+	strncpy(concat, s1, x);
 	strncat(concat, s2, n);
 
-	concat[len1 + n] = '\0';
+	concat[y + n] = '\0';
 	return (concat);
 }
