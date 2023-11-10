@@ -27,9 +27,9 @@ int main(int argc, char *argv[])
 		exit(99);
 	}
 
-	if ((*argv[2] == '/' || *argv[2] == '%') && b ==0)
+	if ((*argv[2] == '/' || *argv[2] == '%') && b == 0)
 	{
-		printf("Error");
+		printf("Error\n");
 		exit(100);
 	}
 	result = func_ptr(a, b);
