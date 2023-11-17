@@ -17,7 +17,7 @@
 typedef struct list_s
 {
 	char *str;
-	unsigned int len;
+	size_t len;
 	struct list_s *next;
 } list_t;
 
@@ -28,5 +28,7 @@ list_t *add_node_end(list_t **head, const char *str);
 void free_list(list_t *head);
 int _putchar(char c);
 void printMainFirst(void)__attribute__((constructor));
+int len(const char *str);
+list_t *make_node(const char *str);
 
 #endif
