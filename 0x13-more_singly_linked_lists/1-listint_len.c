@@ -8,7 +8,7 @@ size_t listint_len(const listint_t *h)
 {
 	size_t new_node = 0;
 
-	while (!new_node)
+	while (h != NULL)
 	{
 		printf("%d\n", h->n);
 		h = h->next;
