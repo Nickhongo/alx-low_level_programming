@@ -1,27 +1,5 @@
 #include "main.h"
 /**
- * copy_file - copies file
- * @fd: ref to file to copy from
- * @fp: ref to file copy to
- * Return: return 1 or -1
- */
-int copy_file(int fd, int fp)
-{
-	char buffer[1024];
-	ssize_t nb_read, nb_write;
-
-	while (nb_read != 0)
-	{
-		nb_read = read(fd, buffer, 1024);
-		if (nb_read == -1)
-			return (-1);
-		nb_write = write(fp, buffer, nb_read);
-		if (nb_write == -1)
-			return (-1);
-	}
-	return (1);
-}
-/**
  * main - main entry point to the program
  * @argc: argument count
  * @argv: argument vector
@@ -69,4 +47,26 @@ int main(int argc, char *argv[])
 		exit(100);
 	}
 	return (0);
+}
+/**
+ *copy_file - copies file
+ *@fd: ref to file to copy from
+ *@fp: ref to file copy to
+ *Return: return 1 or -1
+ */
+int copy_file(int fd, int fp)
+{
+	char buffer[1024];
+	ssize_t nb_read, nb_write;
+
+	while (nb_read != 0)
+	{
+		nb_read = read(fd, buffer, 1024);
+		if (nb_read == -1)
+			return (-1);
+		nb_write = write(fp, buffer, nb_read);
+		if (nb_write == -1)
+			return (-1);
+	}
+	return (1);
 }
