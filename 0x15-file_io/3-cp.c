@@ -1,19 +1,25 @@
 #include "main.h"
 /**
- * error_and_exit - finds the error and exits
- * @exit_start: exit
- * @format: pointer to the exit
- * Return: returns nothing
+ * copy_file - copies file
+ * @fd: ref to file to copy from
+ * @fp: ref to file copy to
+ * Return: return 1 or -1
  */
-void error_and_exit(int exit_start, const char *format, ...)
+int copy_file(int fd, int fp)
 {
-	va_list args;
+	char buffer[1024];
+	ssize_t nb_read, nb_write;
 
-	va_start(args, format);
-
-	dprintf(STDERR_FILENO, format, args);
-	va_end(args);
-	exit(exit_start);
+	while (nb_read != 0)
+	{
+		nb_read = read(fd, buffer, 1024);
+		if (nb_read == -1)
+			return (-1);
+		nb_write = write(fp, buffer, nb_read);
+		if (nb_write == -1)
+			return (-1);
+	}
+	return (1);
 }
 /**
  * main - main entry point to the program
@@ -23,44 +29,44 @@ void error_and_exit(int exit_start, const char *format, ...)
  */
 int main(int argc, char *argv[])
 {
-	char *from;
-	char *to;
-	int fd_from;
-	int fd_to;
-	char buffer[BUFFER_SIZE];
-	ssize_t readByte, writeByte;
+	int a, b, c, d, count;
+	FILE *fp;
 
-	from = argv[1];
-	to = argv[2];
 	if (argc != 3)
-		error_and_exit(97, "Usage: %s file_from_file_to %s\n", argv[0]);
-	fd_from = open(from, O_RDONLY);
-	if (fd_from == -1)
-		error_and_exit(98, "Error: Cant read from file %s\n", from);
-	fd_to = open(to,
-	O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
-	if (fd_to == -1)
 	{
-		close(fd_from);
-		error_and_exit(99, "Error: Cant write to file %s\n", to);
+		dprintf(2, "Usage: cp file_fro, file_to\n");
+		exit(97);
 	}
-	while ((readByte = read(fd_from, buffer, BUFFER_SIZE)) > 0)
-		writeByte = write(fd_to, buffer, readByte);
-	if (writeByte == -1 || writeByte != readByte)
+	a = open(argv[1], O_RDONLY);
+	if (a == -1)
 	{
-		close(fd_from);
-		close(fd_to);
-		error_and_exit(99, "Error: Cant write to file %s\n", to);
+		dprintf(2, "Error: Cant read from file %s\n", argv[1]);
+		exit(98);
 	}
-	if (readByte == -1)
+	fp = fopen(argv[2], "r");
+	if (!fp)
+		b = open(argv[2], O_WRONLY | O_CREAT, 0664);
+	else
+		b = open(argv[2], O_WRONLY | O_TRUNC);
+	count = copy_file(a, b);
+	if (count == -1)
 	{
-		close(fd_from);
-		close(fd_to);
-		error_and_exit(98, "Error: Cant read from file %s\n", from);
+		dprintf(2, "Error: Can't write to %s\n", argv[2]);
+		exit(99);
 	}
-	if (close(fd_from) == -1)
-		error_and_exit(100, "Error: Cant close fd %d\n", fd_from);
-	if (close(fd_to) == -1)
-		error_and_exit(100, "Error: Cant close fd %d\n", fd_to);
+	if (fp)
+		fclose(fp);
+	c = close(a);
+	if (c == -1)
+	{
+		dprintf(2, "Error: Cant close fd %d\n", a);
+		exit(100);
+	}
+	d = close(b);
+	if (d == -1)
+	{
+		dprintf(2, "Error: Cant close fd %d\n", b);
+		exit(100);
+	}
 	return (0);
 }
