@@ -25,29 +25,31 @@ int main(int argc, char *argv[])
 	if (!fp)
 		b = open(argv[2], O_WRONLY | O_CREAT, 0664);
 	else
+	{
 		b = open(argv[2], O_WRONLY | O_TRUNC);
+		fclose(fp);
+	}
 	count = copy_file(a, b);
 	if (count == -1)
 	{
 		dprintf(2, "Error: Can't write to %s\n", argv[2]);
 		exit(99);
 	}
-	if (fp)
-		fclose(fp);
 	c = close(a);
 	if (c == -1)
 	{
-		dprintf(2, "Error: Cant close fd %d\n", a);
+		dprintf(2, "Error: Can't close fd %d\n", a);
 		exit(100);
 	}
 	d = close(b);
 	if (d == -1)
 	{
-		dprintf(2, "Error: Cant close fd %d\n", b);
+		dprintf(2, "Error: Can't close fd %d\n", b);
 		exit(100);
 	}
 	return (0);
 }
+
 /**
  *copy_file - copies file
  *@fd: ref to file to copy from
@@ -57,11 +59,10 @@ int main(int argc, char *argv[])
 int copy_file(int fd, int fp)
 {
 	char buffer[1024];
-	ssize_t nb_read, nb_write;
+	ssize_t nb_read = 0, nb_write;
 
-	while (nb_read != 0)
+	while ((nb_read = read(fd, buffer, 1024)) != 0)
 	{
-		nb_read = read(fd, buffer, 1024);
 		if (nb_read == -1)
 			return (-1);
 		nb_write = write(fp, buffer, nb_read);
