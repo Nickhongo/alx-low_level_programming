@@ -61,7 +61,7 @@ int copy_file(int fd, int fp)
 	char buffer[1024];
 	ssize_t nb_read = 0, nb_write;
 
-	while ((nb_read = read(fd, buffer, 1024)) != 0)
+	while ((nb_read = read(fd, buffer, 1024)) > 0)
 	{
 		if (nb_read == -1)
 			return (-1);
@@ -69,5 +69,8 @@ int copy_file(int fd, int fp)
 		if (nb_write == -1)
 			return (-1);
 	}
+	if (nb_read == -1)
+		return (-1);
+
 	return (1);
 }
