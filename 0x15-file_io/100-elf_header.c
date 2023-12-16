@@ -1,209 +1,65 @@
 #include "main.h"
-
 /**
- * main - Checks code
- *
- * Return: 0 (Success)
+ * print_elf_header_info - prints header info
+ * @header: header
+ * Return: 0
  */
+void print_elf_header_info(Elf64_Ehdr *header) 
+{
+	int i;
+	printf("Magic:   ");
+    for (i = 0; i < EI_NIDENT; ++i) 
+    {
+        printf("%02x ", header->e_ident[i]);
+    }
+    printf("\nClass:                             %s\n", header->e_ident[EI_CLASS] == ELFCLASS32 ? "ELF32" : "ELF64");
+    printf("Data:                              %s\n", header->e_ident[EI_DATA] == ELFDATA2LSB ? "2's complement, little endian" : "2's complement, big endian");
+    printf("Version:                           %d (current)\n", header->e_ident[EI_VERSION]);
+    printf("OS/ABI:                            %s\n", header->e_ident[EI_OSABI] == ELFOSABI_SYSV ? "UNIX - System V" : "Other");
+    printf("ABI Version:                       %d\n", header->e_ident[EI_ABIVERSION]);
+    printf("Type:                              %s\n", header->e_type == ET_EXEC ? "EXEC (Executable file)" : "Other");
+    printf("Entry point address:               %#lx\n", (unsigned long)header->e_entry);
+}
+/**
+ * main - main entry point
+ * @argc: argument count
+ * @argv: argument vector
+ * Return: 0
+ */
+
 int main(int argc, char *argv[])
 {
-    FILE *fp;
-    Elf64_Ehdr ehdr;
+	int fd;
+	ssize_t n;
+	Elf64_Ehdr header;
 
-    if (argc != 2)
-    {   
-        fprintf(stderr, "Usage: ./elf_header elf_file\n");
-        exit(98);
-    }   
-
-    fp = fopen(argv[1], "rb");
-    if (!fp)
-    {   
-        fprintf(stderr, "Error: Can't read %s\n", argv[1]);
-        exit(98);
-    } 
-
-    fread(&ehdr, sizeof(ehdr), 1, fp);
-    check_elf_file(&ehdr);
-    print_magic(ehdr.e_ident);
-    print_class(ehdr.e_ident);
-    print_data(ehdr.e_ident);
-    print_version(ehdr.e_ident);
-    print_osabi(ehdr.e_ident);
-	print_abi_version(ehdr.e_ident);
-	print_type(ehdr.e_type);
-	print_entry_addr(ehdr.e_entry);
-
-	fclose(fp);
-    return (0);
-}
-
-int check_elf_file(Elf64_Ehdr *hdr)
-{
-    int i = 0;
-
-    if (hdr->e_ident[i] != 127 &&
-        hdr->e_ident[i + 1] != 'E' &&
-        hdr->e_ident[i + 2] != 'L' &&
-        hdr->e_ident[i + 3] != 'F'
-    )
-    {
-        return (-1);
+    if (argc != 2) {
+        fprintf(stderr, "Usage: %s elf_filename\n", argv[0]);
+        return 98;
     }
-    return (1);
-}
+    fd = open(argv[1], O_RDONLY);
 
-void print_magic(unsigned char *e_ident)
-{
-    int i;
-
-    printf("ELF Header\n");
-    printf("  Magic:    ");
-
-    for (i = 0; i < EI_NIDENT; i++)
-    {
-        printf("%02x", e_ident[i]);
-        if (i == 15)
-        {
-            printf("\n");
-            continue;
-        }
-        printf(" ");
+    if (fd == -1) {
+        perror("Error opening file");
+        return 98;
     }
-}
 
-void print_class(unsigned char *e_ident)
-{
-    printf("  Class:                              ");
-    switch (e_ident[EI_CLASS])
-    {
-    case ELFCLASSNONE:
-        printf("Invalid class\n");
-        break;
-    case ELFCLASS32:
-        printf("ELF32\n");
-        break;
-    case ELFCLASS64:
-        printf("ELF64\n");
-        break;
-    default:
-        printf("Unknown class\n");
-        break;
+
+    n = read(fd, &header, sizeof(header));
+    if (n == -1) {
+        perror("Error reading file");
+        close(fd);
+        return 98;
     }
-}
 
-void print_entry_addr(Elf64_Addr e_entry)
-{
-    printf("  Entry point address:                ");
-    printf("%#lx\n", e_entry);
-}
-
-void print_abi_version(unsigned char *e_ident)
-{
-    printf("  ABI Version:                        ");
-    printf("%u\n", e_ident[EI_ABIVERSION]);
-}
-
-void print_osabi(unsigned char *e_ident)
-{
-    printf("  OS/ABI:                             ");
-    switch (e_ident[EI_OSABI])
-    {
-    case ELFOSABI_SYSV:
-        printf("UNIX - System V\n");
-        break;
-    case ELFOSABI_HPUX:
-        printf("UNIX - HPUX\n");
-        break;
-    case ELFOSABI_NETBSD:
-        printf("UNIX - NetBSD\n");
-        break;
-    case ELFOSABI_LINUX:
-        printf("UNIX - Linux\n");
-        break;
-    case ELFOSABI_SOLARIS:
-        printf("UNIX - Solaris\n");
-        break;
-    case ELFOSABI_IRIX:
-        printf("UNIX - IRIX\n");
-        break;
-    case ELFOSABI_FREEBSD:
-        printf("UNIX - FreeBSD\n");
-        break;
-    case ELFOSABI_TRU64:
-        printf("UNIX - TRU64_UNIX\n");
-        break;
-    case ELFOSABI_ARM:
-        printf("UNIX - ARM architecture\n");
-        break;
-    case ELFOSABI_STANDALONE:
-        printf("UNIX - Stand-alone (embedded)\n");
-        break;
-    default:
-        printf("Unknown %u\n", e_ident[EI_OSABI]);
-        break;
+    if (n != sizeof(header) || memcmp(header.e_ident, ELFMAG, SELFMAG) != 0) {
+        fprintf(stderr, "Not an ELF file\n");
+        close(fd);
+        return 98;
     }
-}
 
-void print_data(unsigned char *e_ident)
-{
-    printf("  Data:                               ");
-    switch (e_ident[EI_DATA])
-    {
-    case ELFDATANONE:
-        printf("Unknown data format\n");
-        break;
-    case ELFDATA2LSB:
-        printf("2's complement, little endian\n");
-        break;
-    case ELFDATA2MSB:
-        printf("2's complement, big endian\n");
-        break;
-    default:
-        printf("Unknown data format\n");
-        break;
-    }
-}
+    print_elf_header_info(&header);
 
-void print_version(unsigned char *e_ident)
-{
-    printf("  Version:                            ");
-    switch (e_ident[EI_VERSION])
-    {
-    case EV_NONE:
-        printf("Invalid version\n");
-        break;
-    case EV_CURRENT:
-        printf("1 (current)\n");
-        break;
-    default:
-        printf("Unknown version\n");
-        break;
-    }
-}
-
-void print_type(unsigned short e_type)
-{
-    printf("  Type:                               ");
-    switch (e_type)
-    {
-    case ET_NONE:
-        printf("Unknown type\n");
-        break;
-    case ET_REL:
-        printf("REL (Relocatable File)\n");
-        break;
-    case ET_EXEC:
-        printf("EXEC (Executable file)\n");
-        break;
-    case ET_DYN:
-        printf("DYN (Shared object file)\n");
-        break;
-    case ET_CORE:
-        printf("Core file\n");
-        break;
-    default:
-        printf("Unknown type\n");
-        break;
-    }
+    close(fd);
+    return 0;
 }
