@@ -1,77 +1,68 @@
 #include "main.h"
-
+#include <stdio.h>
 /**
- * main - Checks code
- * @argc: Number of program parameters
- * @argv: Array of program paramters
+ *check_err_file - checks for errors in an opened file
+ *@file_from: source file
+ *@file_to: destination file
+ *@argv: argument vector
+ */
+void check_err_file(int file_from, int file_to, char *argv[])
+{
+	if (file_from == -1)/*after opening the file*/
+	{
+		dprintf(STDERR_FILENO, "Error: Can't read from file %s\n", argv[1]);
+		exit(98);
+	}
+	if (file_to == -1)/*after opening the file*/
+	{
+		dprintf(STDERR_FILENO, "Error: Can't write to file %s\n", argv[2]);
+		exit(99);
+	}
+}
+/**
+ *main - copy content of a file from source to destination file
+ *@argc: argument count
+ *@argv: argument vector
  *
- * Return: 0 (Success)
+ *Return: 0
  */
 int main(int argc, char *argv[])
 {
-	int fd1, fd2, cfd1, cfd2, result;
-	FILE *fp;
+	int file_from, file_to, err_close;
+	ssize_t chars_count, num_wr;
+	char buff[1024];/*copies 1024 at a go*/
 
 	if (argc != 3)
 	{
-		dprintf(2, "Usage: cp file_from file_to\n");
+		dprintf(STDERR_FILENO, "%s\n", "Usage: cp file_from file_to");
 		exit(97);
 	}
-	fd1 = open(argv[1], O_RDONLY);
-	if (fd1 == -1)
+
+	file_from = open(argv[1], O_RDONLY);
+	file_to = open(argv[2], O_CREAT | O_WRONLY | O_TRUNC | O_APPEND, 0664);
+	check_err_file(file_from, file_to, argv);
+
+	chars_count = 1024;
+	while (chars_count == 1024)
 	{
-		dprintf(2, "Error: Can't read from file %s\n", argv[1]);
-		exit(98);
+		chars_count = read(file_from, buff, 1024);
+		if (chars_count == -1)
+			check_err_file(-1, 0, argv);
+		num_wr = write(file_to, buff, chars_count);
+		if (num_wr == -1)
+			check_err_file(0, -1, argv);
 	}
-	fp = fopen(argv[2], "r");
-	if (!fp)
-		fd2 = open(argv[2], O_WRONLY | O_CREAT, 0664);
-	else
-		fd2 = open(argv[2], O_WRONLY | O_TRUNC);
-	result = copy_file(fd1, fd2);
-	if (result == -1)
+	err_close = close(file_from);
+	if (err_close == -1)
 	{
-		dprintf(2, "Error: Can't write to %s\n", argv[2]);
-		exit(99);
-	}
-	if (fp)
-		fclose(fp);
-	cfd1 = close(fd1);
-	if (cfd1 == -1)
-	{
-		dprintf(2, "Error: Can't close fd %d\n", fd1);
+		dprintf(STDERR_FILENO, "Error: Can't close fd %d\n", file_from);
 		exit(100);
 	}
-	cfd2 = close(fd2);
-	if (cfd2 == -1)
+	err_close = close(file_to);
+	if (err_close == -1)
 	{
-		dprintf(2, "Error: Can't close fd %d\n", fd2);
+		dprintf(STDERR_FILENO, "Error: Can't close fd %d\n", file_from);
 		exit(100);
 	}
 	return (0);
-}
-
-/**
- * copy_file - Copies content of a file to another file
- * @fd1: reference to file to copy from
- * @fd2: reference to file to copy to
- *
- * Return: 1 on succcess, -1 othersise
- */
-int copy_file(int fd1, int fd2)
-{
-	char buffer[1024];
-	ssize_t nb_read = -1, nb_written;
-
-	while (nb_read != 0)
-	{
-		nb_read = read(fd1, buffer, 1024);
-		if (nb_read == -1)
-			return (-1);
-		nb_written = write(fd2, buffer, nb_read);
-		if (nb_written == -1)
-			return (-1);
-	}
-
-	return (1);
 }
