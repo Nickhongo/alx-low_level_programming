@@ -49,7 +49,6 @@ int main(int argc, char *argv[])
 	}
 	return (0);
 }
-
 /**
  *copy_file - copies file
  *@fd: ref to file to copy from
@@ -71,6 +70,5 @@ int copy_file(int fd, int fp)
 	}
 	if (nb_read == -1)
 		return (-1);
-
 	return (1);
 }
