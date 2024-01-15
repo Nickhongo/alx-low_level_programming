@@ -1,6 +1,6 @@
 #include <stdlib.h>
 /**
- * sub - adds two integers
+ * sub - subtracts two integers
  * @a: first integer
  * @b: second integer
  *
