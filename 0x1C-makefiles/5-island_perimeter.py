@@ -1,33 +1,51 @@
 #!/usr/bin/python3
+"""
+This module contains the following function:
+    island_perimeter - Calculates the perimeter of an island. The
+                        island is described in a grid containing sq.
+                        boxes of 1x1 units
+
+"""
+
 
 def island_perimeter(grid):
     """
-    Calculate the perimeter of the island described in the grid.
+    Calculates perimeter of island in a grid
 
     Args:
-    grid (List[List[int]]): A list of lists of integers representing the
-    grid where:
-                             - 0 represents a water zone
-                             - 1 represents a land zone
+        grid (list of lists): Grid with or without an island
+                        island is marked with 1, while surr. water
 
     Returns:
-    int: The perimeter of the island.
+        perimeter (int): Perimeter of the island
+    """
 
-     """
-    perimeter = 0
-    for i in range(len(grid)):
-        for j in range(len(grid[0])):
+    if not isinstance(grid, list):
+        raise TypeError("The grid must be a list")
+
+    height = len(grid)
+    if height > 100:
+        raise ValueError("width/height should not exceed 100")
+
+    prmtr = 0
+    for i in range(height):
+        if not isinstance(grid[i], list):
+            raise TypeError("The grid must be a list of lists")
+        width = len(grid[i])
+        if width > 100:
+            raise ValueError("width/height should not exceed 100")
+
+        for j in range(width):
+            if not isinstance(grid[i][j], int):
+                raise TypeError("The grid list should contain ints")
+            if grid[i][j] not in {0, 1}:
+                raise ValueError("The grid should contain only 0 and 1")
+
             if grid[i][j] == 1:
-                # Check left neighbor
-                if j == 0 or grid[i][j - 1] == 0:
-                    perimeter += 1
-                # Check right neighbor
-                if j == len(grid[0]) - 1 or grid[i][j + 1] == 0:
-                    perimeter += 1
-                # Check top neighbor
-                if i == 0 or grid[i - 1][j] == 0:
-                    perimeter += 1
-                # Check bottom neighbor
-                if i == len(grid) - 1 or grid[i + 1][j] == 0:
-                    perimeter += 1
-    return perimeter
+                prmtr += 4
+                if i > 0 and grid[i - 1][j] == 1:
+                    prmtr -= 2
+                if j > 0 and grid[i][j - 1] == 1:
+                    prmtr -= 2
+
+    return prmtr
